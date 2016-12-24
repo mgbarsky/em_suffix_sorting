@@ -249,38 +249,3 @@ int refill_buffer (MergeManager * merger, int file_number) {
 }
 
 
-INPUT_ELEMENT_T ** allocate_input_buffers (int num_elements) {
-	INPUT_ELEMENT_T ** result = (INPUT_ELEMENT_T **)  calloc (num_elements, sizeof (INPUT_ELEMENT_T *));
-	if (result == NULL) {
-		printf ("Could not allocate input buffers array of size %d\n", num_elements);
-		exit (1);
-	}
-	return result;
-}
-
-INPUT_ELEMENT_T * allocate_input_buffer (int num_elements) {
-	INPUT_ELEMENT_T * result = (INPUT_ELEMENT_T *) calloc (num_elements, sizeof (INPUT_ELEMENT_T));
-	if (result == NULL) {
-		printf ("Could not allocate input buffers array of size %d\n", num_elements);
-		exit (1);
-	}
-	return result;
-}
-
-OUTPUT_ELEMENT_T *allocate_output_buffer (int num_elements) {
-	OUTPUT_ELEMENT_T * result = (OUTPUT_ELEMENT_T *)  calloc (num_elements, sizeof (OUTPUT_ELEMENT_T));
-	if (result == NULL) {
-		printf ("Could not allocate output buffer of size %d\n", num_elements);
-		exit (1);
-	}
-	return result;
-}
-
-HEAP_ELEMENT_T *allocate_heap (int num_elements) {
-	HEAP_ELEMENT_T * result = (HEAP_ELEMENT_T *)  calloc (num_elements, sizeof (HEAP_ELEMENT_T));
-	if (result == NULL) {
-		printf ("Could not allocate heap of size %d\n", num_elements);
-		exit (1);
-	}
-	return result;
-}

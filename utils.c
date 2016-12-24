@@ -9,9 +9,17 @@ void * Calloc (int num_bytes) {
 	return result;
 }
 
+
 void OpenBinaryFileRead (FILE ** fp, char * file_name) {
 	if(!(*fp= fopen ( file_name , "rb" )))	{
 		printf("Could not open input binary file \"%s\" for reading \n", file_name);
+		exit (1);
+	}
+}
+
+void OpenBinaryFileReadWrite (FILE ** fp, char * file_name) {
+	if(!(*fp= fopen ( file_name , "r+b" )))	{
+		printf("Could not open input binary file \"%s\" for reading and writing \n", file_name);
 		exit (1);
 	}
 }

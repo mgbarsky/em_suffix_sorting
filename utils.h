@@ -10,6 +10,7 @@
 #define MAX_LINE 10000
 #define MAX_CHAR 255
 #define MAX_PATH_LENGTH 1024
+#define MAX_COMMAND_LENGTH 2048
 #define DEFAULT_CHAR_BUFFER_SIZE 524288
 #define DEFAULT_LONG_BUFFER_SIZE 65536
 
@@ -31,7 +32,7 @@
 void OpenBinaryFileRead (FILE ** fp, char * file_name);
 void OpenBinaryFileWrite (FILE ** fp, char * file_name);
 void OpenBinaryFileAppend(FILE ** fp, char * file_name);
-
+void OpenBinaryFileReadWrite (FILE ** fp, char * file_name);
 
 void Fwrite (const void *buffer, size_t elem_size, size_t num_elements, FILE *fp );
 void * Calloc (int num_bytes);

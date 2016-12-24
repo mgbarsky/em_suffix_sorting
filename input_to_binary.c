@@ -59,8 +59,16 @@ int main (int argc, char ** argv) {
 	}
 	
 	fclose(inputFP);
+	if (pos_in_buffer == DEFAULT_CHAR_BUFFER_SIZE) {
+		Fwrite (buffer, sizeof(char), pos_in_buffer, outputFP);
+		pos_in_buffer = 0;
+	}
 	//add sentinel - for the end-of-chunk
-	buffer[pos_in_buffer++] = 0; 
+	buffer[pos_in_buffer++] = 0;
+
+	//add double-sentinel to signify end of file
+	if (line_breaks) 
+		buffer[pos_in_buffer++] = 0;
 
 	if (pos_in_buffer > 0)
 		Fwrite (buffer, sizeof(char), pos_in_buffer, outputFP);

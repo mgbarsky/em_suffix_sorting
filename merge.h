@@ -16,7 +16,7 @@ typedef struct merge_manager {
 	HEAP_ELEMENT_T lastTransferred; //last element transferred from heap to output buffer - TBD maybe not needed
 	FILE *inputFP; //stays closed, opens each time we need to reupload some amount of data from disk
 	RUN_ID_T *inputFileNumbers;  //we need to know the file name and interval to open the necessary input file	
-	FILE *outputFP;  //stays open (closed in this case, as we write into different output files) to flush output buffer when full
+	FILE *outputFP;  
 	OUTPUT_ELEMENT_T* outputBuffer; //buffer to store output elements until they are flushed to disk
 	int currentPositionInOutputBuffer;  //where to add element in output buffer
 	int outputBufferCapacity; //how many elements max can it hold

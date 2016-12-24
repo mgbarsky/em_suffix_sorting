@@ -9,6 +9,7 @@ int num_input_files = 0;
 //2 directories are created and input files are preprocessed into binary input with sentinel
 int main (int argc, char ** argv) {
 	char file_name [MAX_PATH_LENGTH];
+	char command [MAX_COMMAND_LENGTH];
 	int h, result;
 	int more_runs = 1;
 	if (argc < 2 ) {
@@ -31,6 +32,11 @@ int main (int argc, char ** argv) {
 	h=0;
 	while (more_runs) {
 		more_runs = 0;
+
+		//clean temp directory for the next iteration
+		sprintf (command, "exec rm %s/*", temp_dir);
+		system(command);
+
 		//generate sorted runs with counts and local rank pairs grouped by file_id and interval_id 
 		result = generate_local_runs (output_dir, temp_dir, num_input_files, h);
 		if (result != EMPTY)
@@ -38,10 +44,19 @@ int main (int argc, char ** argv) {
 		if (result == FAILURE)
 			return FAILURE;
 
-		//merge local ranks into global ranks - from all 
+		//merge local ranks into global ranks - from all the chunks
+		result  =  resolve_global_ranks (temp_dir );
+		if (result != EMPTY)
+			more_runs = 1;
+		if (result == FAILURE)
+			return FAILURE;
 
 		//update local ranks with resolved global ranks
-
+		result =  update_local_ranks (output_dir, temp_dir);
+		if (result != EMPTY)
+			more_runs = 1;
+		if (result == FAILURE)
+			return FAILURE;
 		h++;
 	}
 	return SUCCESS;
