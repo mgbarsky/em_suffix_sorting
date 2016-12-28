@@ -1,0 +1,3 @@
+1. The final ranks do not match the expected
+2. We do not need to read the entire file when updating the ranks - just move from the previous file position to the next, and write it there
+3. Most time takes producing local runs sorted by curr,next
