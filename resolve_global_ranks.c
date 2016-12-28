@@ -1,4 +1,3 @@
-
 #include "merge.h"
 
 
@@ -42,10 +41,13 @@ int resolve_global_ranks (char *temp_dir ) {
 	manager.currentInputBufferPositions  = (int *) Calloc (manager.total_files * sizeof(int));
 	manager.currentInputBufferlengths  = (int *) Calloc (manager.total_files * sizeof(int));
 	
-	//allocate output buffer
-	manager.outputBuffer = (OutputElement *) Calloc (OUTPUT_BUFFER_SIZE * sizeof (OutputElement));
- 	manager.outputBufferCapacity = OUTPUT_BUFFER_SIZE;
-	manager.currentPositionInOutputBuffer = 0;
+	//allocate output buffers - multiple in this algorithm
+	manager.outputBufferCapacity =  MAX_MEM_OUTPUT_BUFFERS/(sizeof(OutputElement)*(manager.total_files));
+	manager.outputBuffers = (OutputElement **) Calloc (manager.total_files * sizeof (OutputElement*));
+	for (i=0; i<manager.total_files;i++)
+		manager.outputBuffers [i] = (OutputElement *) Calloc (manager.outputBufferCapacity *sizeof(OutputElement));
+ 	
+	manager.currentOutputBufferPositions  = (int *) Calloc (manager.total_files * sizeof(int));	
 
 	//allocate heap
 	manager.heap = (HeapElement *) Calloc (manager.total_files * sizeof (HeapElement));

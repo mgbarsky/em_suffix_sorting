@@ -12,6 +12,7 @@ int main (int argc, char ** argv) {
 	char command [MAX_COMMAND_LENGTH];
 	int h, result;
 	int more_runs = 1;
+
 	if (argc < 2 ) {
 		printf ("To run ./algorithm <number input files>\n");
 		return 1;
@@ -34,7 +35,12 @@ int main (int argc, char ** argv) {
 		more_runs = 0;
 
 		//clean temp directory for the next iteration
-		sprintf (command, "exec rm %s/*", temp_dir);
+		if (DEBUG_SMALL) sprintf (command, "RMDIR \"%s\" /S /Q", temp_dir);
+		if (DEBUG_SMALL) puts (command);
+		system(command);
+
+		if (DEBUG_SMALL) sprintf (command, "MKDIR \"%s\"", temp_dir);
+		if (DEBUG_SMALL) puts (command);
 		system(command);
 
 		//generate sorted runs with counts and local rank pairs grouped by file_id and interval_id 
@@ -44,20 +50,25 @@ int main (int argc, char ** argv) {
 		if (result == FAILURE)
 			return FAILURE;
 
-		//merge local ranks into global ranks - from all the chunks
-		result  =  resolve_global_ranks (temp_dir );
-		if (result != EMPTY)
-			more_runs = 1;
-		if (result == FAILURE)
-			return FAILURE;
+		if (more_runs) {
+			//merge local ranks into global ranks - from all the chunks
+			result  =  resolve_global_ranks (temp_dir );
+			if (result != EMPTY)
+				more_runs = 1;
+			if (result == FAILURE)
+				return FAILURE;
 
-		//update local ranks with resolved global ranks
-		result =  update_local_ranks (output_dir, temp_dir);
-		if (result != EMPTY)
-			more_runs = 1;
-		if (result == FAILURE)
-			return FAILURE;
-		h++;
+			if (more_runs) {
+				//update local ranks with resolved global ranks
+				result =  update_local_ranks (output_dir, temp_dir);
+				if (result != EMPTY)
+					more_runs = 1;
+				if (result == FAILURE)
+					return FAILURE;
+				h++;
+				printf ("Iteration %d completed\n", h);
+			}
+		}
 	}
 	return SUCCESS;
 }

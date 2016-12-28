@@ -4,6 +4,7 @@
 int merge_runs (MergeManager * merger){	
 	int  result; //stores SUCCESS/FAILURE returned at the end
 	OUTPUT_ELEMENT_T output_result;
+	int f_id ;
 
 	//1. go in the loop through all input files and fill-in initial buffers
 	if (init_merge (merger)!=SUCCESS)
@@ -19,7 +20,7 @@ int merge_runs (MergeManager * merger){
 		if(get_top_heap_element (merger, &smallest)!=SUCCESS)
 			return FAILURE;
 
-		result = get_next_input_element (merger, smallest.currentRank, &next);
+		result = get_next_input_element (merger, smallest.file_number, &next);
 		
 		if (result==FAILURE)
 			return FAILURE;
@@ -34,36 +35,42 @@ int merge_runs (MergeManager * merger){
 		if(heap_to_output ( &(merger->lastTransferred),  &smallest, &output_result)!=SUCCESS)
 			return FAILURE;
 
-		if (valid_output(&output_result)) {  //app-specific
-			merger->outputBuffer[merger->currentPositionInOutputBuffer++]=output_result;
+		if (valid_output(&output_result)) {  //app-specific	
+			f_id = output_result.file_number;
+			merger->outputBuffers[f_id][merger->currentOutputBufferPositions[f_id]]=output_result;
+			merger->currentOutputBufferPositions[f_id]++;
+
+			//staying on the last slot of the output buffer - next will cause overflow
+			if(merger->currentOutputBufferPositions[f_id] == merger-> outputBufferCapacity ) {
+				if(flush_output_buffers(merger, f_id)!=SUCCESS)
+					return FAILURE;			
+				merger->currentOutputBufferPositions[f_id]=0;
+			}	
 		}
 
 		if (merger->currentHeapSize == 0) { //last heap element
 			heap_to_output_last_element (&(merger->lastTransferred), &smallest,  &output_result);
 			
-			if(merger->currentPositionInOutputBuffer == merger-> outputBufferCapacity ) {
-				if(flush_output(merger)!=SUCCESS)
+			f_id = output_result.file_number;
+			if(merger->currentOutputBufferPositions[f_id] == merger-> outputBufferCapacity ) {
+				if(flush_output_buffers(merger, f_id)!=SUCCESS)
 					return FAILURE;			
-				merger->currentPositionInOutputBuffer=0;
+				merger->currentOutputBufferPositions[f_id]=0;
 			}	
-			merger->outputBuffer[merger->currentPositionInOutputBuffer++]=output_result;
+			merger->outputBuffers[f_id][merger->currentOutputBufferPositions[f_id] ]=output_result;
+			merger->currentOutputBufferPositions[f_id] ++;
 		}
 
-		merger->lastTransferred = smallest;
-
-		//staying on the last slot of the output buffer - next will cause overflow
-		if(merger->currentPositionInOutputBuffer == merger-> outputBufferCapacity ) {
-			if(flush_output(merger)!=SUCCESS)
-				return FAILURE;			
-			merger->currentPositionInOutputBuffer=0;
-		}	
+		merger->lastTransferred = smallest;		
 	}
 
 	
 	//flush what remains in output buffer
-	if(merger->currentPositionInOutputBuffer > 0) {
-		if(flush_output(merger)!=SUCCESS)
-			return FAILURE;
+	for (f_id=0; f_id< merger->total_files; f_id++) {
+		if(merger->currentOutputBufferPositions[f_id] > 0) {
+			if(flush_output_buffers(merger, f_id)!=SUCCESS)
+				return FAILURE;
+		}
 	}
 	
 	if (DEBUG) printf("Merge complete.\n");
@@ -197,7 +204,10 @@ void clean_up(MergeManager * merger)
 	free(merger->currentInputFilePositions);
 	free(merger->currentInputBufferPositions);
 	free(merger->currentInputBufferlengths);
-	free(merger->outputBuffer);
+	for (i=0; i<merger->total_files;i++)
+		free(merger->outputBuffers [i]);
+	free(merger->outputBuffers);
+	free(merger->currentOutputBufferPositions);
 	free(merger->heap);
 	free(merger->inputFileNumbers);
 }

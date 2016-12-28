@@ -37,7 +37,7 @@ int compare_heap_elements (HEAP_ELEMENT_T *a, HEAP_ELEMENT_T *b) {
 	if (a->currentRank == b->currentRank ) {
 		if (a->nextRank == b->nextRank)
 			return a->file_number - b->file_number;
-		return a->nextRank - b->nextRank;
+		return Absolute(a->nextRank) - Absolute (b->nextRank);
 	}
 	
 	return a->currentRank - b->currentRank;
@@ -89,43 +89,25 @@ int heap_to_output ( HEAP_ELEMENT_T *previous, HEAP_ELEMENT_T *current, OUTPUT_E
 	
 }
 
-int flush_output (MergeManager *merger) { 
-
+int flush_output_buffers (MergeManager *merger, int f_id) {
 	int i;
-	int prev_file_number;
-	char file_name [MAX_PATH_LENGTH];	
-	merger->outputFP = NULL;
-
-	//empty output buffer by appending its content to the corresponding file	
-	prev_file_number = -1;
+	char file_name [MAX_PATH_LENGTH];
+	int total_to_write = merger->currentOutputBufferPositions[f_id];
+	RunID id = merger->inputFileNumbers [f_id];
+	sprintf (file_name, "%s/global_%d_%ld", merger->output_dir, 
+				id.file_id, id.interval_id);
+	OpenBinaryFileAppend (&(merger->outputFP), file_name); 
 	
-	for (i=0; i< merger->currentPositionInOutputBuffer; i++) { 
-		GlobalRecord record = merger->outputBuffer[i].output;
-		RunID id = merger->inputFileNumbers [merger->outputBuffer[i].file_number];
-		
-		if (merger->outputBuffer[i].file_number != prev_file_number) {
-			if (merger->outputFP != NULL){
-				fclose (merger->outputFP);
-				merger->outputFP = NULL;
-			}
+	for (i=0; i< merger->currentOutputBufferPositions[f_id]; i++) { 
+		GlobalRecord record = merger->outputBuffers[f_id][i].output;	
 
-			sprintf (file_name, "%s/global_%d_%ld", merger->output_dir, 
-				merger->inputFileNumbers[id.file_id].file_id, merger->inputFileNumbers[id.file_id].interval_id);			
-			
-			prev_file_number = merger->outputBuffer[i].file_number;
-		}
-
-		if (record.newRank != record.currentRank) { 
-			if (merger->outputFP == NULL) {
-				OpenBinaryFileAppend (&(merger->outputFP), file_name); 
-			}
+		if (record.newRank != record.currentRank) { 			
 			Fwrite (&record, sizeof (GlobalRecord), 1, merger->outputFP);
 		}
 	}
-
-	if (merger->outputFP != NULL) { 
-		fclose (merger->outputFP);
-		merger->outputFP = NULL;
-	}
+	
+	fclose (merger->outputFP);
+	merger->outputFP = NULL;
+	
 	return SUCCESS;
 }

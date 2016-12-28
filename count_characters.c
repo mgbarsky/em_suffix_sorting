@@ -12,7 +12,7 @@ void count_characters_infile (char * input_file_name, char * output_file_name) {
 	OpenBinaryFileRead (&inputFP, input_file_name);
 	while ((read = fread (buffer,sizeof(char),DEFAULT_CHAR_BUFFER_SIZE,inputFP)) > 0){		
 		for (i=0; i < read; i++) {
-			char current = ABS (buffer[i]);
+			char current = (buffer[i]>=0)?buffer[i]:-buffer[i];
 			char_counts [(int)current] ++;
 		}
 	}

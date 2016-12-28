@@ -17,7 +17,7 @@ void file_to_ranks (char * input_file_name, char * output_file_name, long *ranks
 	b=0; //position in output buffer
 	while ((read = fread (input_buffer,sizeof(char),DEFAULT_CHAR_BUFFER_SIZE,inputFP)) > 0){		
 		for (i=0; i < read; i++) {
-			char current = ABS (input_buffer[i]);
+			char current = Absolute (input_buffer[i]);
 			if (ranks_array [(int)current] == -1) {
 				printf ("Unexpected error: no initial rank for character %c\n", current);
 				exit (1);
@@ -33,6 +33,7 @@ void file_to_ranks (char * input_file_name, char * output_file_name, long *ranks
 						printf("%ld ",output_buffer[d]); 
 				}
 				Fwrite (output_buffer, sizeof (long), b, outputFP);
+				b=0;
 			}
 		}
 	}

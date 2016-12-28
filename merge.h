@@ -8,8 +8,8 @@
 #define RUN_ID_T RunID
 
 #define OUTPUT_BUFFER_SIZE 1024
-#define MAX_MEM_INPUT_BUFFERS 1024000000  //~1 gb
-
+#define MAX_MEM_INPUT_BUFFERS 512000000  //~500 MB
+#define MAX_MEM_OUTPUT_BUFFERS 512000000 //~500 MB 
 
 typedef struct merge_manager {
 	HEAP_ELEMENT_T *heap;  //keeps 1 from each buffer in top-down order - smallest on top (according to compare function)
@@ -17,8 +17,8 @@ typedef struct merge_manager {
 	FILE *inputFP; //stays closed, opens each time we need to reupload some amount of data from disk
 	RUN_ID_T *inputFileNumbers;  //we need to know the file name and interval to open the necessary input file	
 	FILE *outputFP;  
-	OUTPUT_ELEMENT_T* outputBuffer; //buffer to store output elements until they are flushed to disk
-	int currentPositionInOutputBuffer;  //where to add element in output buffer
+	OUTPUT_ELEMENT_T** outputBuffers; //buffer to store output elements until they are flushed to disk
+	int *currentOutputBufferPositions;  //where to add element in each output buffer
 	int outputBufferCapacity; //how many elements max can it hold
 	INPUT_ELEMENT_T **inputBuffers; //array of buffers to buffer part of runs
 	int inputBufferCapacity; //how many elements max can each hold
@@ -28,8 +28,8 @@ typedef struct merge_manager {
 	int currentHeapSize;
 	int heapCapacity;  //corresponds to the total number of files (input buffers)
 	int total_files;
-	char * output_dir;
-	char * input_prefix ;
+	char output_dir [MAX_PATH_LENGTH];
+	char input_prefix [MAX_PATH_LENGTH] ;
 }MergeManager;
 
 //1
@@ -39,7 +39,8 @@ int merge_runs (MergeManager * manager); //main loop
 int init_merge (MergeManager * manager);  //creates and fills initial buffers, initializes heap taking 1 element from each buffer
 
 //3
-int flush_output (MergeManager * manager);
+//int flush_output_buffer (MergeManager * manager);
+int flush_output_buffers (MergeManager * manager, int file_number); //special for this app - multiple buffers for output
 
 //4
 int get_top_heap_element (MergeManager * manager, HEAP_ELEMENT_T * result);

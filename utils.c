@@ -47,3 +47,7 @@ void Fwrite (const void *buffer, size_t elem_size, size_t num_elements, FILE *fp
 	}
 }
 
+long Absolute (long x) {
+	return ( x<0 ) ? -x : x;
+}
+

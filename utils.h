@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 1
-#define DEBUG_SMALL 1
+#define DEBUG 0
+#define DEBUG_SMALL 0
 
 #define MAX_LINE 10000
 #define MAX_CHAR 255
@@ -26,7 +26,7 @@
 #define FAILURE 1
 #define EMPTY 2
 
-#define ABS(n) ((n)<0)? -(n) : (n)
+long Absolute (long x);
 
 
 void OpenBinaryFileRead (FILE ** fp, char * file_name);

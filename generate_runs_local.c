@@ -19,7 +19,11 @@ int compare_current_next (const void * a, const void *b) {
 	if (r_a->currentRank < r_b->currentRank)
 		return -1;
 
-	return (ABS (r_a->nextRank) - ABS (r_b->nextRank));
+	if (Absolute (r_a->nextRank) > Absolute (r_b->nextRank))
+		return 1;
+	if (Absolute (r_a->nextRank) < Absolute (r_b->nextRank))
+		return -1;
+	return 0;
 }
 
 void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *output_buffer, int num_elements){
@@ -40,6 +44,13 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 	OpenBinaryFileWrite (&localFP, local_file_name);
 
 	qsort (output_buffer, num_elements, sizeof (LocalRecord), compare_current_next);
+
+	if (DEBUG_SMALL) {
+		printf ("Sorted local records:\n");
+		for (i=0; i < num_elements; i++) {
+			printf ("pos=%d curr=%ld next=%ld\n", output_buffer[i].pos, output_buffer[i].currentRank, output_buffer[i].nextRank);
+		}
+	}
 	Fwrite (output_buffer, sizeof(LocalRecord), num_elements, localFP);
 	for (i=0; i < num_elements; i++) {
 		if (output_buffer[i].currentRank != prev_current ) {			 
@@ -49,7 +60,7 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 				record.count = count;
 				Fwrite (&record, sizeof(RunRecord), 1, runFP);
 				count=0;
-			}
+			}		
 		}
 		else if (output_buffer[i].currentRank == prev_current && output_buffer[i].nextRank != prev_next) {
 			record.currentRank = prev_current;
@@ -58,6 +69,8 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 			Fwrite (&record, sizeof(RunRecord), 1, runFP);
 			count=0;
 		}
+		prev_current = output_buffer[i].currentRank;
+		prev_next = output_buffer[i].nextRank;
 		count++;
 	}
 	
@@ -96,7 +109,7 @@ int generate_runs_single_file (char * current_ranks_file_name, char *temp_dir, i
 
 	//allocate buffers
 	input_buffer = (long *) Calloc ((DEFAULT_TRIPLE_BUFFER_SIZE+prefix_len)*sizeof(long));
-	output_buffer_local = (LocalRecord *) Calloc (DEFAULT_TRIPLE_BUFFER_SIZE *sizeof (LocalRecord));
+	output_buffer_local = (LocalRecord *) Calloc ((DEFAULT_TRIPLE_BUFFER_SIZE + prefix_len) *sizeof (LocalRecord));
 
 
 	//open ranks file
@@ -105,7 +118,7 @@ int generate_runs_single_file (char * current_ranks_file_name, char *temp_dir, i
 	buffer_id = 0;
 
 	//read ranks into input buffer
-	while ((read_result = fread (input_buffer, sizeof (long), (DEFAULT_TRIPLE_BUFFER_SIZE + prefix_len),inputFP))>0) {
+	while ((read_result = fread (input_buffer, sizeof (long), (DEFAULT_TRIPLE_BUFFER_SIZE + prefix_len),inputFP))>prefix_len) {
 		total_in_buffer = read_result;
 		total_to_process = read_result - prefix_len;
 		pos_in_buffer = 0;
@@ -134,7 +147,8 @@ int generate_runs_single_file (char * current_ranks_file_name, char *temp_dir, i
 		}
 
 		//we need to go backwards - we read prefix_len more characters that we needed	
-		fseek (inputFP, - prefix_len, SEEK_CUR);
+		//printf ("Curr pos in file %d\n",ftell(inputFP));
+		fseek (inputFP, - prefix_len*sizeof(long), SEEK_CUR);
 	}
 
 	if (pos_output_buffer > 0) {
