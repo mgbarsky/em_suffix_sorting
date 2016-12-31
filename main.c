@@ -41,7 +41,7 @@ int main (int argc, char ** argv) {
 
 		if (DEBUG_SMALL) sprintf (command, "MKDIR \"%s\"", temp_dir);
 		if (DEBUG_SMALL) puts (command);
-		system(command);
+ 		system(command);
 
 		//generate sorted runs with counts and local rank pairs grouped by file_id and interval_id 
 		result = generate_local_runs (output_dir, temp_dir, num_input_files, h);

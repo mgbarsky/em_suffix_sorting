@@ -106,7 +106,9 @@ int update_local_ranks (char * ranks_dir, char * temp_dir) {
 			
 			resolved_pos = 0;
 			local_pos = 0;
-			
+			curr_local.currentRank = 0;
+			curr_global.currentRank =0;
+
 			while (local_pos < total_local && resolved_pos < total_resolved) {
 				if (curr_local.currentRank == 0 )  //reading the first record from each buffer
 					curr_local = local_records[local_pos];
@@ -123,7 +125,7 @@ int update_local_ranks (char * ranks_dir, char * temp_dir) {
 				}
 				else { //they are not equal
 					//current local does not have resolved counterpart - advance to the next current local
-					if (curr_local.currentRank < curr_global.currentRank || (curr_local.currentRank == curr_global.currentRank && curr_local.nextRank < curr_global.nextRank)){
+					if (curr_local.currentRank < curr_global.currentRank || (curr_local.currentRank == curr_global.currentRank && Absolute(curr_local.nextRank) < Absolute(curr_global.nextRank))){
 						local_pos++;
 						if (local_pos < total_local) {
 							curr_local = local_records[local_pos];

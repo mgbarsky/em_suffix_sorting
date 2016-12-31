@@ -97,10 +97,12 @@ int flush_output_buffers (MergeManager *merger, int f_id) {
 	sprintf (file_name, "%s/global_%d_%ld", merger->output_dir, 
 				id.file_id, id.interval_id);
 	OpenBinaryFileAppend (&(merger->outputFP), file_name); 
-	
+	if (DEBUG_SMALL)
+		printf ("Global counts for file %d\n", f_id);
 	for (i=0; i< merger->currentOutputBufferPositions[f_id]; i++) { 
 		GlobalRecord record = merger->outputBuffers[f_id][i].output;	
-
+		if (DEBUG_SMALL)
+			printf ("Old rank = %ld next rank =%ld, new rank = %ld\n", record.currentRank, record.nextRank, record.newRank);
 		if (record.newRank != record.currentRank) { 			
 			Fwrite (&record, sizeof (GlobalRecord), 1, merger->outputFP);
 		}

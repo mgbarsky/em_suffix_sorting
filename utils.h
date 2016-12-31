@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 0
-#define DEBUG_SMALL 0
-
+#define DEBUG 1
+#define DEBUG_SMALL 1
 #define MAX_LINE 10000
 #define MAX_CHAR 255
 #define MAX_PATH_LENGTH 1024

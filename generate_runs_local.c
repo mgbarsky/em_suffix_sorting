@@ -23,7 +23,9 @@ int compare_current_next (const void * a, const void *b) {
 		return 1;
 	if (Absolute (r_a->nextRank) < Absolute (r_b->nextRank))
 		return -1;
-	return 0;
+
+	return r_a->pos - r_b->pos;
+
 }
 
 void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *output_buffer, int num_elements){
@@ -50,6 +52,8 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 		for (i=0; i < num_elements; i++) {
 			printf ("pos=%d curr=%ld next=%ld\n", output_buffer[i].pos, output_buffer[i].currentRank, output_buffer[i].nextRank);
 		}
+
+
 	}
 	Fwrite (output_buffer, sizeof(LocalRecord), num_elements, localFP);
 	for (i=0; i < num_elements; i++) {
@@ -58,6 +62,7 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 				record.currentRank = prev_current;
 				record.nextRank = prev_next;
 				record.count = count;
+				if (DEBUG_SMALL) 	printf ("Run record curr=%ld next=%ld count=%d\n", record.currentRank, record.nextRank, record.count);	
 				Fwrite (&record, sizeof(RunRecord), 1, runFP);
 				count=0;
 			}		
@@ -66,6 +71,7 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 			record.currentRank = prev_current;
 			record.nextRank = prev_next;
 			record.count = count;
+			if (DEBUG_SMALL) 	printf ("Run record curr=%ld next=%ld count=%d\n", record.currentRank, record.nextRank, record.count);			
 			Fwrite (&record, sizeof(RunRecord), 1, runFP);
 			count=0;
 		}
@@ -78,6 +84,7 @@ void flush_local_run (char *temp_dir, int file_id, int buffer_id, LocalRecord *o
 	record.currentRank = prev_current;
 	record.nextRank = prev_next;
 	record.count = count;
+	if (DEBUG_SMALL) 	printf ("Run record curr=%ld next=%ld count=%d\n", record.currentRank, record.nextRank, record.count);	
 	Fwrite (&record, sizeof(RunRecord), 1, runFP);
 
 	fclose (runFP);
